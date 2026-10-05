@@ -28,14 +28,55 @@ score_position = (0, 420)
 sprite_width = 72
 sprite_height = 50
 
+
 map_1 = [
-    [2, 0, 0, 0, 3, 0, 5, 0],
-    [3, 0, 0, 0, 3, 3, 2, 0],
-    [4, 5, 2, 0, 3, 0, 4, 0],
+    [2, 5, 3, 4, 3, 2, 5, 2],
+    [3, 4, 2, 3, 3, 3, 2, 3],
+    [4, 5, 2, 4, 3, 5, 4, 3],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
 ]
+
+map_2 = [
+    [1, 2, 3, 4, 3, 2, 5, 2],
+    [1, 2, 3, 3, 3, 3, 2, 3],
+    [1, 2, 3, 4, 3, 5, 4, 3],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+]
+
+map_ultimate = [
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+]
+
+
+def create_random_map(number_of_rows, number_of_columns=8):
+    map = []
+    for row in range(number_of_rows):
+        single_line = []
+        for col in range(number_of_columns):
+            single_line.append(random.randint(2, 5))
+        map.append(single_line)
+    return map
+
+
+levels = [
+    create_random_map(2),
+    create_random_map(3),
+    create_random_map(4),
+    create_random_map(5),
+    create_random_map(6),
+    map_ultimate,
+]
+current_level = 0
 
 
 def map_to_actors(map):
@@ -96,14 +137,35 @@ print("Actors", Actor("brick-black").width, Actor("brick-black").height)
 # Game over boolean
 game_over = False
 
-actors = map_to_actors(map_1)
+
+def get_map_for_level_up(level):
+    return levels[level]
+
+
+def get_actors_for_level(level):
+    return map_to_actors(get_map_for_level_up(level))
+
+
+actors = get_actors_for_level(current_level)
+
+
+def count_actors(actors_array):
+    cnt = 0
+    for actor in actors_array:
+        if actor != None:
+            cnt += 1
+    return cnt
 
 
 def ball_hit_actor():
-    global actors, ball, hit_count
+    global actors, ball, hit_count, current_level
 
     hit_detected = False
     found = None
+    if count_actors(actors) == 0:
+        current_level += 1
+        actors = get_actors_for_level(current_level)
+
     for actor in actors:
         if actor != None and ball.colliderect(actor):
             hit_count += 1
@@ -120,7 +182,7 @@ def ball_hit_actor():
 
 
 def draw():
-    global actors
+    global actors, current_level, hit_count
 
     screen.clear()
 
@@ -135,7 +197,7 @@ def draw():
     draw_actors(actors)
 
     screen.draw.text(
-        f"Score: {hit_count}",
+        f"Score: {hit_count}, remaining: {count_actors(actors)}, level {current_level}",
         score_position,
         color="black",
         fontname="mojang-regular",
@@ -185,13 +247,13 @@ def update():
         ball.xvel = ball.xvel * -1
         ball.yvel = ball.yvel * -1
 
-    if hit_count > 10 and not is_warp_mode:
-        is_warp_mode = True
-        x = paddle.x
-        y = paddle.y
-        paddle = Actor("warp_pad")
-        paddle.x = x
-        paddle.y = y
+    # if hit_count > 10 and not is_warp_mode:
+    #     is_warp_mode = True
+    #     x = paddle.x
+    #     y = paddle.y
+    #     paddle = Actor("warp_pad")
+    #     paddle.x = x
+    #     paddle.y = y
 
     draw()
 
