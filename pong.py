@@ -1,3 +1,5 @@
+"""Simple Pong game (is this Pong??)"""
+
 import pgzero, pgzrun, random
 
 # Window setup
@@ -59,6 +61,16 @@ map_ultimate = [
 
 
 def create_random_map(number_of_rows, number_of_columns=8):
+    """
+    Creates a level map with specified number of rows and columns
+    made of random bricks, excluding brick 2 (black cat)
+
+    Parameters:
+    -----------
+    number_of_rows: int, how many rows to produce
+    number_of_columns: int, how many columns in the map;
+        defaults to 8 as in this configuration we can't fit more columns
+    """
     map = []
     for row in range(number_of_rows):
         single_line = []
@@ -76,10 +88,15 @@ levels = [
     create_random_map(6),
     map_ultimate,
 ]
+
 current_level = 0
 
 
 def map_to_actors(map):
+    """
+    Converts a level map (matrix) to a simple one-dimensional array
+    of PGZero's Actor objects that are used for drawing, collision detection, etc.
+    """
     rows = len(map)
     cols = len(map[0])
 
@@ -115,7 +132,10 @@ def map_to_actors(map):
 
 
 def draw_actors(actors_to_draw):
-    """Go across rows and columns, find the actor and draw it"""
+    """
+    Traverse across rows and columns, find the Actor object and draw it
+    on the corresponding row/column position
+    """
     # rows = len(actors_to_draw)
     # cols = len(actors_to_draw[0])
 
@@ -139,10 +159,12 @@ game_over = False
 
 
 def get_map_for_level_up(level):
+    """Return level map for specified level"""
     return levels[level]
 
 
 def get_actors_for_level(level):
+    """Return Actor's one-dimensional array for specified level"""
     return map_to_actors(get_map_for_level_up(level))
 
 
@@ -150,6 +172,7 @@ actors = get_actors_for_level(current_level)
 
 
 def count_actors(actors_array):
+    """Count arrays in an array, excludes Actors that are set to None"""
     cnt = 0
     for actor in actors_array:
         if actor != None:
@@ -158,6 +181,10 @@ def count_actors(actors_array):
 
 
 def ball_hit_actor():
+    """
+    Detects if the ball has collided with any of the Actors and removes
+    those Actors from the array so they disappear from the game (level)
+    """
     global actors, ball, hit_count, current_level
 
     hit_detected = False
@@ -182,6 +209,12 @@ def ball_hit_actor():
 
 
 def draw():
+    """
+    Draws the current game. This is not very efficient as it
+    draws the entire screen from scratch on every iteration, i.e.
+    it clears the screen and then draws all bricks, the ball, score
+    indicators, etc.
+    """
     global actors, current_level, hit_count
 
     screen.clear()
@@ -206,6 +239,11 @@ def draw():
 
 
 def update():
+    """
+    Directs ball movement depending if it has hit the walls or bricks.
+    Counts score and progresses to the next level.
+    """
+
     global game_over, hit_count, is_warp_mode, paddle
 
     # Stop the update function if game over is true
